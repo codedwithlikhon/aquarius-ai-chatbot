@@ -4,6 +4,7 @@ import { generateText, type UIMessage } from "ai";
 import { cookies } from "next/headers";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { myProvider } from "@/lib/ai/providers";
+import { ChatSDKError } from "@/lib/errors";
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
@@ -35,6 +36,13 @@ export async function generateTitleFromUserMessage({
 
 export async function deleteTrailingMessages({ id }: { id: string }) {
   const [message] = await getMessageById({ id });
+
+  if (!message) {
+    throw new ChatSDKError(
+      "not_found:chat",
+      "The requested message could not be found."
+    );
+  }
 
   await deleteMessagesByChatIdAfterTimestamp({
     chatId: message.chatId,
