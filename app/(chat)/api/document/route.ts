@@ -26,11 +26,11 @@ export async function GET(request: Request) {
 
   const documents = await getDocumentsById({ id });
 
-  const [document] = documents;
-
-  if (!document) {
+  if (documents.length === 0) {
     return new ChatSDKError("not_found:document").toResponse();
   }
+
+  const [document] = documents;
 
   if (document.userId !== session.user.id) {
     return new ChatSDKError("forbidden:document").toResponse();
@@ -110,6 +110,10 @@ export async function DELETE(request: Request) {
   }
 
   const documents = await getDocumentsById({ id });
+
+  if (documents.length === 0) {
+    return new ChatSDKError("not_found:document").toResponse();
+  }
 
   const [document] = documents;
 
