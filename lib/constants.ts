@@ -10,10 +10,4 @@ export const isTestEnvironment = Boolean(
 
 export const guestRegex = /^guest-\d+$/;
 
-const dummyPasswordPromise = generateDummyPassword();
 
-export const DUMMY_PASSWORD = dummyPasswordPromise;
-
-export function getDummyPassword() {
-  return dummyPasswordPromise;
-}
