@@ -15,6 +15,7 @@
   <a href="https://chat-sdk.dev"><strong>Read Docs</strong></a> ·
   <a href="#features"><strong>Features</strong></a> ·
   <a href="#model-providers"><strong>Model Providers</strong></a> ·
+  <a href="#sentinel-monitoring-apis"><strong>Sentinel APIs</strong></a> ·
   <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
   <a href="#running-locally"><strong>Running locally</strong></a>
 </p>
@@ -48,6 +49,21 @@ Aquarius AI Copilot Agent uses the [Vercel AI Gateway](https://vercel.com/docs/a
 **For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
 
 With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+
+## Sentinel Monitoring APIs
+
+Sentinel extends Aquarius with production observability, alerting, and health monitoring. Use the [Sentinel Monitoring API Guide](docs/sentinel-apis.md) to:
+
+- Discover available REST endpoints and response codes
+- Manage users, spaces, and series with authenticated requests
+- Configure pingback health checks and Grafana dashboards
+- Stand up the full Sentinel stack locally with Docker Compose
+
+When integrating Sentinel into automation flows, secure all credentials (admin tokens, API keys) with your deployment platform's secret management and enforce entitlement checks in Aquarius tool handlers.
+
+## Open Source Stewardship
+
+Aquarius AI Copilot Agent is released as an open-source project under the [MIT License](LICENSE) and stewarded by [Likhon Sheikh](https://t.me/likhonsheikh). Community contributions, bug reports, and feature proposals are always welcome—please open an issue or pull request to collaborate. If you adopt Aquarius in production, consider sharing feedback with Likhon to help guide the roadmap.
 
 ## Deploy Your Own
 
