@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Aquarius Logo Light</title>
+  <desc id="desc">Diamond shaped Aquarius brand mark with a rainbow gradient fill.</desc>
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff5f6d" />
+      <stop offset="25%" stop-color="#ffc371" />
+      <stop offset="50%" stop-color="#47cf73" />
+      <stop offset="75%" stop-color="#2bc0e4" />
+      <stop offset="100%" stop-color="#845ef7" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke-width="0">
+    <path fill="url(#gradient)" d="M128 8l120 120-120 120L8 128z" />
+    <path fill="#0c1c2c" d="M128 68l60 60-60 60-60-60z" opacity="0.8" />
+  </g>
+</svg>
