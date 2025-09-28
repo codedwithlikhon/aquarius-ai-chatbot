@@ -79,7 +79,7 @@ Vercel Hobby teams can only schedule two cron jobs across all projects. Aquarius
 
 Follow the [Edge Runtime Authentication Hardening guide](docs/auth-edge-runtime.md) to:
 
-- [ ] Confirm the correct bcrypt runtime loads on both Node and Edge deployments.
+- [ ] Confirm Node deployments use `@node-rs/bcrypt` and Edge deployments pick up the `bcryptjs` fallback.
 - [ ] Configure optional `BCRYPT_COST` overrides per environment.
 - [ ] Validate guest and credential sign-ins using the shared hashing helpers.
 

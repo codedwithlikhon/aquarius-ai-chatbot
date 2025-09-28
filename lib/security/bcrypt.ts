@@ -1,17 +1,19 @@
-import type { hash as hashNodeFn } from "@node-rs/bcrypt";
-import type { hash as hashWasmFn } from "@node-rs/bcrypt-wasm32-wasi";
+import "server-only";
+
+import type {
+  compare as compareNodeFn,
+  hash as hashNodeFn,
+} from "@node-rs/bcrypt";
+import type * as bcryptJs from "bcryptjs";
 import { ChatSDKError } from "../errors";
 
 // The node build exposes `compare` while the wasm build exposes `verify`.
 type NodeBcryptModule = {
   hash: typeof hashNodeFn;
-  compare: (password: string, hashedPassword: string) => Promise<boolean>;
+  compare: typeof compareNodeFn;
 };
 
-type WasmBcryptModule = {
-  hash: typeof hashWasmFn;
-  verify: (password: string, hashedPassword: string) => Promise<boolean>;
-};
+type BcryptJsModule = typeof bcryptJs;
 
 type BcryptAdapter = {
   hash(password: string, cost: number): Promise<string>;
@@ -99,12 +101,46 @@ const createNodeAdapter = (module: NodeBcryptModule): BcryptAdapter => ({
   },
 });
 
-const createWasmAdapter = (module: WasmBcryptModule): BcryptAdapter => ({
+const hashWithBcryptJs = (
+  module: BcryptJsModule,
+  password: string,
+  cost: number
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    module.hash(password, cost, (error, hash) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(hash);
+    });
+  });
+};
+
+const compareWithBcryptJs = (
+  module: BcryptJsModule,
+  password: string,
+  hashedPassword: string
+): Promise<boolean> => {
+  return new Promise((resolve, reject) => {
+    module.compare(password, hashedPassword, (error, result) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(result);
+    });
+  });
+};
+
+const createBcryptJsAdapter = (module: BcryptJsModule): BcryptAdapter => ({
   hash(password, cost) {
-    return module.hash(password, cost);
+    return hashWithBcryptJs(module, password, cost);
   },
   compare(password, hashedPassword) {
-    return module.verify(password, hashedPassword);
+    return compareWithBcryptJs(module, password, hashedPassword);
   },
 });
 
@@ -112,10 +148,8 @@ const loadBcryptModule = (): Promise<BcryptAdapter> => {
   if (!runtimeCache.module) {
     runtimeCache.module = (async () => {
       if (isEdgeRuntime()) {
-        const module = (await import(
-          "@node-rs/bcrypt-wasm32-wasi"
-        )) as WasmBcryptModule;
-        return createWasmAdapter(module);
+        const module = (await import("bcryptjs")) as BcryptJsModule;
+        return createBcryptJsAdapter(module);
       }
 
       const module = (await import("@node-rs/bcrypt")) as NodeBcryptModule;
