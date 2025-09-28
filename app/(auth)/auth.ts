@@ -1,9 +1,9 @@
-import { compare } from "bcrypt-ts";
 import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import { DUMMY_PASSWORD } from "@/lib/constants";
+import { getDummyPassword } from "@/lib/constants";
 import { createGuestUser, getUser } from "@/lib/db/queries";
+import { verifyPassword } from "@/lib/security/bcrypt";
 import { authConfig } from "./auth.config";
 
 export type UserType = "guest" | "regular";
@@ -43,20 +43,21 @@ export const {
       credentials: {},
       async authorize({ email, password }: any) {
         const users = await getUser(email);
+        const dummyPasswordHash = await getDummyPassword();
 
         if (users.length === 0) {
-          await compare(password, DUMMY_PASSWORD);
+          await verifyPassword(password, dummyPasswordHash);
           return null;
         }
 
         const [user] = users;
 
         if (!user.password) {
-          await compare(password, DUMMY_PASSWORD);
+          await verifyPassword(password, dummyPasswordHash);
           return null;
         }
 
-        const passwordsMatch = await compare(password, user.password);
+        const passwordsMatch = await verifyPassword(password, user.password);
 
         if (!passwordsMatch) {
           return null;

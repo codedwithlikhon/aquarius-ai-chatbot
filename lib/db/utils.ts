@@ -1,16 +1,13 @@
 import { generateId } from "ai";
-import { genSaltSync, hashSync } from "bcrypt-ts";
+import { hashPassword } from "../security/bcrypt";
 
-export function generateHashedPassword(password: string) {
-  const salt = genSaltSync(10);
-  const hash = hashSync(password, salt);
+const BCRYPT_COST = 10 as const;
 
-  return hash;
-}
+export const generateHashedPassword = (password: string): Promise<string> => {
+  return hashPassword(password, BCRYPT_COST);
+};
 
-export function generateDummyPassword() {
+export const generateDummyPassword = (): Promise<string> => {
   const password = generateId();
-  const hashedPassword = generateHashedPassword(password);
-
-  return hashedPassword;
-}
+  return generateHashedPassword(password);
+};
