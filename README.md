@@ -75,14 +75,6 @@ You can deploy your own version of Aquarius AI Copilot Agent to Vercel with one 
 
 Vercel Hobby teams can only schedule two cron jobs across all projects. Aquarius ships with cron scheduling disabled by default so deployments succeed without consuming another slot. Review [docs/cron-jobs.md](docs/cron-jobs.md) for instructions on enabling the `/api/cron` task or wiring an external scheduler when you have capacity.
 
-### Edge runtime auth hardening
-
-Follow the [Edge Runtime Authentication Hardening guide](docs/auth-edge-runtime.md) to:
-
-- [ ] Confirm Node deployments use `@node-rs/bcrypt` and Edge deployments pick up the `bcryptjs` fallback.
-- [ ] Configure optional `BCRYPT_COST` overrides per environment.
-- [ ] Validate guest and credential sign-ins using the shared hashing helpers.
-
 ## Running locally
 
 You will need to use the environment variables [defined in `.env.example`](.env.example) to run Aquarius AI Copilot Agent. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.

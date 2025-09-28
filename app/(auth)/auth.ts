@@ -54,21 +54,12 @@ export const {
     Credentials({
       credentials: {},
       async authorize({ email, password }: any) {
-        const normalizedEmail = normalizeCredential(email, "Email");
-        const normalizedPassword = normalizeCredential(password, "Password");
-
-        const users = await getUser(normalizedEmail);
-        const dummyPasswordHash = await getDummyPassword();
-
-        if (users.length === 0) {
-          await verifyPassword(normalizedPassword, dummyPasswordHash);
           return null;
         }
 
         const [user] = users;
 
         if (!user.password) {
-          await verifyPassword(normalizedPassword, dummyPasswordHash);
           return null;
         }
 
