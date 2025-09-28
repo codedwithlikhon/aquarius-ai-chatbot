@@ -1,16 +1,22 @@
+import { hash } from "@node-rs/bcrypt";
 import { generateId } from "ai";
-import { genSaltSync, hashSync } from "bcrypt-ts";
+import { ChatSDKError } from "../errors";
 
-export function generateHashedPassword(password: string) {
-  const salt = genSaltSync(10);
-  const hash = hashSync(password, salt);
+const BCRYPT_COST = 10 as const;
 
-  return hash;
+export async function generateHashedPassword(password: string) {
+  try {
+    const hashedPassword = await hash(password, BCRYPT_COST);
+
+    return hashedPassword;
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:auth", "Failed to hash password.");
+  }
 }
 
-export function generateDummyPassword() {
+export async function generateDummyPassword() {
   const password = generateId();
-  const hashedPassword = generateHashedPassword(password);
+  const hashedPassword = await generateHashedPassword(password);
 
   return hashedPassword;
 }

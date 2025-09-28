@@ -6,8 +6,8 @@ export const authConfig = {
     newUser: "/",
   },
   providers: [
-    // added later in auth.ts since it requires bcrypt which is only compatible with Node.js
-    // while this file is also used in non-Node.js environments
+    // added later in auth.ts since it wires in credential providers that depend on
+    // server-side hashing utilities and should not be imported in edge-safe contexts
   ],
   callbacks: {},
 } satisfies NextAuthConfig;

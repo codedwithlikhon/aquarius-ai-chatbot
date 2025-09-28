@@ -1,8 +1,8 @@
-import { compare } from "bcrypt-ts";
+import { compare } from "@node-rs/bcrypt";
 import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import { DUMMY_PASSWORD } from "@/lib/constants";
+import { getDummyPassword } from "@/lib/constants";
 import { createGuestUser, getUser } from "@/lib/db/queries";
 import { authConfig } from "./auth.config";
 
@@ -43,16 +43,17 @@ export const {
       credentials: {},
       async authorize({ email, password }: any) {
         const users = await getUser(email);
+        const dummyPasswordHash = await getDummyPassword();
 
         if (users.length === 0) {
-          await compare(password, DUMMY_PASSWORD);
+          await compare(password, dummyPasswordHash);
           return null;
         }
 
         const [user] = users;
 
         if (!user.password) {
-          await compare(password, DUMMY_PASSWORD);
+          await compare(password, dummyPasswordHash);
           return null;
         }
 
