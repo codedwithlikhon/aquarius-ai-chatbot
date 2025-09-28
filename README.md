@@ -37,9 +37,6 @@
   - Redis-backed streaming buffers and artifact storage with resumable recovery
 - **Secure authentication**
   - [Auth.js](https://authjs.dev) guest and password flows with entitlements and rate limiting
-- **Sentinel monitoring ready**
-  - Built-in integration points for Sentinel spaces, series, and pingback orchestration
-  - Detailed [Sentinel API guide](docs/sentinel-apis.md) for managing monitoring resources
 
 ## Model Providers
 
