@@ -75,10 +75,10 @@ export function getDocumentTimestampByIndex(
   documents: Document[],
   index: number,
 ) {
-  if (!documents) { return new Date(); }
-  if (index > documents.length) { return new Date(); }
+  if (!Array.isArray(documents)) { return new Date(); }
+  if (index < 0 || index >= documents.length) { return new Date(); }
 
-  return documents[index].createdAt;
+  return documents[index]?.createdAt ?? new Date();
 }
 
 export function getTrailingMessageId({
