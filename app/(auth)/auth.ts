@@ -1,13 +1,20 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import { getDummyPassword } from "@/lib/constants";
+
 import { createGuestUser, getUser } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import { verifyPassword } from "@/lib/security/bcrypt";
+import { getDummyPassword } from "@/lib/security/dummy-password";
+
 import { authConfig } from "./auth.config";
 
 export type UserType = "guest" | "regular";
+
+type CredentialsAuthorizePayload = {
+  email?: unknown;
+  password?: unknown;
+};
 
 const normalizeCredential = (value: unknown, label: string): string => {
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -53,7 +60,22 @@ export const {
   providers: [
     Credentials({
       credentials: {},
-      async authorize({ email, password }: any) {
+      async authorize(credentials: CredentialsAuthorizePayload | undefined) {
+        if (!credentials) {
+          return null;
+        }
+
+        const normalizedEmail = normalizeCredential(credentials.email, "Email");
+        const normalizedPassword = normalizeCredential(
+          credentials.password,
+          "Password"
+        );
+
+        const users = await getUser(normalizedEmail);
+
+        if (users.length === 0) {
+          const dummyPassword = await getDummyPassword();
+          await verifyPassword(normalizedPassword, dummyPassword);
           return null;
         }
 
@@ -72,7 +94,9 @@ export const {
           return null;
         }
 
-        return { ...user, type: "regular" };
+        const { password: _password, ...userWithoutPassword } = user;
+
+        return { ...userWithoutPassword, type: "regular" };
       },
     }),
     Credentials({
