@@ -3,10 +3,22 @@ import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { getDummyPassword } from "@/lib/constants";
 import { createGuestUser, getUser } from "@/lib/db/queries";
+import { ChatSDKError } from "@/lib/errors";
 import { verifyPassword } from "@/lib/security/bcrypt";
 import { authConfig } from "./auth.config";
 
 export type UserType = "guest" | "regular";
+
+const normalizeCredential = (value: unknown, label: string): string => {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new ChatSDKError(
+      "bad_request:auth",
+      `${label} is required to sign in.`
+    );
+  }
+
+  return value.trim();
+};
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -42,22 +54,28 @@ export const {
     Credentials({
       credentials: {},
       async authorize({ email, password }: any) {
-        const users = await getUser(email);
+        const normalizedEmail = normalizeCredential(email, "Email");
+        const normalizedPassword = normalizeCredential(password, "Password");
+
+        const users = await getUser(normalizedEmail);
         const dummyPasswordHash = await getDummyPassword();
 
         if (users.length === 0) {
-          await verifyPassword(password, dummyPasswordHash);
+          await verifyPassword(normalizedPassword, dummyPasswordHash);
           return null;
         }
 
         const [user] = users;
 
         if (!user.password) {
-          await verifyPassword(password, dummyPasswordHash);
+          await verifyPassword(normalizedPassword, dummyPasswordHash);
           return null;
         }
 
-        const passwordsMatch = await verifyPassword(password, user.password);
+        const passwordsMatch = await verifyPassword(
+          normalizedPassword,
+          user.password
+        );
 
         if (!passwordsMatch) {
           return null;

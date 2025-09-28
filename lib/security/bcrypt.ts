@@ -36,8 +36,16 @@ const isEdgeRuntime = (): boolean => {
   );
 };
 
+type RuntimeEnvironment = {
+  process?: { env?: Record<string, string | undefined> };
+};
+
+const getEnvironmentValue = (key: string): string | undefined => {
+  return (globalThis as RuntimeEnvironment).process?.env?.[key];
+};
+
 const parseBcryptCost = (): number => {
-  const rawValue = process.env.BCRYPT_COST;
+  const rawValue = getEnvironmentValue("BCRYPT_COST");
 
   if (!rawValue) {
     return DEFAULT_COST;
@@ -74,8 +82,8 @@ const getNormalizedCost = (cost?: number): number => {
   return cost;
 };
 
-const ensureNonEmptyString = (value: string, label: string): string => {
-  if (value.length === 0) {
+const ensureNonEmptyString = (value: unknown, label: string): string => {
+  if (typeof value !== "string" || value.length === 0) {
     throw new ChatSDKError("bad_request:auth", `${label} must not be empty.`);
   }
 
