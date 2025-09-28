@@ -1,32 +1,50 @@
 # Cron Job Configuration
 
-Aquarius ships with an optional `/api/cron` endpoint that performs background maintenance when triggered with the `CRON_SECRET` bearer token. Deployments on the Vercel Hobby plan are limited to two scheduled cron jobs per team. Attempting to deploy this project with the cron configuration enabled will fail if your team already uses both slots.
+Keep Aquarius deployable on every Vercel plan while still running background automation when you need it.
+
+## Quick Start Checklist
+- [ ] Confirm how many Vercel cron slots your team is already using (`vercel projects list` → `cronJobsUsed`).
+- [ ] Decide whether Aquarius should consume one of the two Hobby cron slots or rely on an external scheduler.
+- [ ] Set the `CRON_SECRET` environment variable in every environment that can call `/api/cron`.
+- [ ] Document the chosen scheduler in your runbook so on-call engineers know where jobs originate.
 
 ## Deployment Options
 
-Use one of the following strategies to stay within Vercel's cron limits:
+### ✅ Option 1: Keep the repository defaults (no scheduled cron)
+- Aquarius ships with an empty `crons` array in [`vercel.json`](../vercel.json).
+- Deployments succeed on all plans because no additional cron slot is consumed.
+- Trigger maintenance manually (`vercel env pull`, curl, etc.) or wire an external scheduler when ready.
 
-1. **Keep the repo defaults (no scheduled cron)**
-   - The checked-in [`vercel.json`](../vercel.json) file intentionally ships with an empty `crons` array.
-   - Aquarius will deploy without scheduling a new cron job, so you avoid plan limit failures.
-   - You can still invoke `/api/cron` manually or via an external scheduler when maintenance needs to run.
+```jsonc
+{
+  "crons": []
+}
+```
 
-2. **Schedule a single consolidated cron job on Vercel**
-   - Copy [`vercel.cron.example.json`](../vercel.cron.example.json) to `vercel.json` in your fork.
-   - Update the `schedule` to the cadence you need and redeploy.
-   - Ensure you have a `CRON_SECRET` environment variable configured so the scheduled request is authorized.
-   - If you already run multiple maintenance tasks, route them all through `/api/cron` to stay within the single scheduled job.
+### ✅ Option 2: Consolidate tasks behind a single Vercel cron
+- Copy [`vercel.cron.example.json`](../vercel.cron.example.json) to `vercel.json` in your fork.
+- Update the schedule to the cadence you need and redeploy.
+- Route all recurring maintenance through `/api/cron` so you stay within one scheduled job.
 
-3. **Use an external scheduler**
-   - Trigger `https://<your-domain>/api/cron` from GitHub Actions, cron-job.org, or any preferred scheduler.
-   - Pass `Authorization: Bearer $CRON_SECRET` in the request headers.
-   - External schedulers let you keep Vercel within plan limits while still running recurring maintenance.
+```jsonc
+{
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
+```
 
-## Recommended Workflow
+### ✅ Option 3: Use an external scheduler
+- Call `https://<your-domain>/api/cron` from GitHub Actions, cron-job.org, or your platform of choice.
+- Always pass `Authorization: Bearer $CRON_SECRET`.
+- External schedulers let you keep Vercel under the plan limit while still running recurring work.
 
-1. Decide whether Vercel should manage the cron or if an external service is preferred.
-2. Set the `CRON_SECRET` environment variable in your deployment.
-3. If you opt into Vercel scheduling, update `vercel.json` before running `vercel deploy`.
-4. Verify the `/api/cron` endpoint responds with `{ "ok": true }` when called with the correct secret.
+## Validation Checklist
+- [ ] `curl -H "Authorization: Bearer $CRON_SECRET" https://<domain>/api/cron` returns `{ "ok": true }`.
+- [ ] Observability dashboards or alerts confirm the cron task ran at the expected cadence.
+- [ ] Runbooks reference how to rotate `CRON_SECRET` and what to monitor for failures.
 
-Following these steps keeps Aquarius deployable on the Hobby plan while providing a clear path to enable scheduled maintenance when you have capacity.
+Following these checklists keeps Aquarius deployable on the Hobby plan while leaving a clear path to scale maintenance workloads as your startup grows.
